@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Advanced Currency Converter & More</title>
+    <style>
+        *{box-sizing:border-box;}
+        body {
+            margin:0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background:
+                radial-gradient(circle at top left, #a685e2 0%, #7551d1 60%),
+                linear-gradient(135deg, #28283f 0%, #525673 100%);
+            color: #e0e0e0;
+            height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+        #app {
+            background: rgba(35, 25, 55, 0.75);
+            border-radius: 18px;
+            width: 100%;
+            max-width: 1200px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px #8a67e7cc;
+            backdrop-filter: blur(9px);
+            margin: 0 auto;
+        }
+        header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #7551d1aa;
+            text-align: center;
+            user-select:none;
+        }
+        header h1 {
+            font-weight: 800;
+            font-size: 2.5rem;
+            color: #e9e9f4;
+            text-shadow: 0 0 10px #b393ff;
+            margin: 0;
+            letter-spacing: 1.6px;
+        }
+        nav.top-menu, nav.taskbar {
+            display: flex;
+            justify-content: center;
+            background: rgba(55, 48, 88, 0.8);
+            padding: 10px 0;
+            user-select:none;
+        }
+        nav.top-menu { margin-bottom: 20px; }
+        nav.taskbar {
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.15);
+            justify-content: space-around;
+            margin-top: auto;
+        }
+        nav button {
+            background: transparent;
+            border: none;
+            padding: 13px 25px;
+            color: #d1caffcc;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            flex-grow: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-bottom 0.3s ease;
+        }
+        nav.taskbar button {
+            padding: 12px 20px;
+            font-size: 0.9rem;
+            flex-grow: 1;
+            letter-spacing: 0.9px;
+        }
+        nav button.active {
+            border-bottom: 3px solid #e6c9ff;
+            color: #f0e6ff;
+            background-color: rgba(75,58,114,0.8);
+        }
+        nav button:hover:not(.active) {
+            background: rgba(85,70,130,0.7);
+            color: #e5dfff;
+        }
+        nav button:focus-visible {
+            outline: 2px solid #b38effcc;
+            outline-offset: -2px;
+        }
+        main {
+            display: flex;
+            flex-grow: 1;
+            overflow:auto;
+            padding: 20px 30px;
+        }
+        .left-bar, .right-bar {
+            width: 200px;
+            background: rgba(55, 48, 88, 0.7);
+            color: #d1caffcc;
+            padding: 20px;
+            border-radius: 14px;
+            margin: 20px 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            overflow-y: auto;
+            max-height: calc(100vh - 140px);
+            position: relative;
+        }
+        .left-bar h2, .right-bar h2 {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e9e9f4;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #7551d1aa;
+            position: sticky;
+            top: 0;
+            background: rgba(55,48,88,0.7);
+            z-index: 1;
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0 30px;
+            overflow-y: auto;
+        }
+        .converter-box {
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 0.7px;
+            font-size: 0.95rem;
+            color: #e1d7ffcc;
+        }
+        select, input[type="number"], input[type="email"], input[type="text"], textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(154,127,234,0.2);
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #333;
+            background-color: #f0f0f0;
+            resize: none;
+            margin-bottom: 15px;
+            transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        select:focus, input:focus, textarea:focus {
+            box-shadow: 0 0 12px #a68aff;
+            border-color: #a68aff;
+        }
+        textarea {
+            min-height: 120px;
+        }
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        button.swap-btn {
+            background: #8a67e2;
+            border: none;
+            padding: 13px 18px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.6rem;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 22px #c4aeffcc;
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0;
+            user-select:none;
+            transition: background 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+        }
+        button.swap-btn:hover {
+            background: #9d81f5;
+            box-shadow: 0 0 28px #d6c4ffdd;
+        }
+        button.convert-btn {
+            flex-grow: 1;
+            background: #7561d8;
+            border: none;
+            padding: 15px 30px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 0 16px #a88fffcc;
+            transition: background 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+        }
+        button.convert-btn:hover {
+            background: #8e79ef;
+            box-shadow: 0 0 20px #babbffdd;
+        }
+        .result-box {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: #eee;
+            user-select:none;
+            word-wrap: break-word;
+            margin-bottom: 20px;
+            min-height:60px;
+        }
+        .rate-info {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+            color: #d6c4ffcc;
+            font-style: italic;
+            user-select:none;
+        }
+        .history-list, .review-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 14px;
+            padding: 15px;
+            font-size: 1rem;
+        }
+        .history-list {
+            background-color: rgba(110, 90, 190, 0.2);
+            color: #ebe6ffcc;
+        }
+        .review-list {
+            background-color: rgba(140, 118, 226, 0.15);
+            color: #f5efff;
+        }
+        .history-item, .review-item {
+            border-bottom: 1px solid #8a67e7aa;
+            padding: 12px 8px;
+            word-break: break-word;
+        }
+        .review-item {
+            border-bottom: 1px solid #a379e0aa;
+            padding: 12px 10px;
+        }
+        .history-item:last-child, .review-item:last-child {
+            border-bottom: none;
+        }
+        .history-timestamp {
+            font-size: 0.85rem;
+            color: #c9baffcc;
+            margin-top: 5px;
+        }
+        .reviewer-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #e0cfff;
+        }
+        .review-text {
+            margin-top: 8px;
+            font-style: italic;
+            color: #f0e8ffcc;
+            font-size: 0.95rem;
+        }
+        .review-form button, .contact-box button {
+            margin-top: 15px;
+            background: #8c71e0;
+            border: none;
+            color: white;
+            padding: 13px 25px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 0 16px #b8a7ffcc;
+            transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            font-size: 1.1rem;
+        }
+        .review-form button:hover, .contact-box button:hover {
+            background: #a58eff;
+            box-shadow: 0 0 20px #c8baffdd;
+        }
+        .contact-box label {
+            margin-top: 15px;
+        }
+        .contact-message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            color: #a7e07a;
+            font-size: 1rem;
+        }
+        .contact-error {
+            color: #ff8a8a;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #ddd;
+            font-size: 1rem;
+            user-select:none;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #6e57c2aa;
+            text-align: left;
+        }
+        th {
+            background-color: rgba(107, 73, 210, 0.8);
+            font-weight: 700;
+            color: #f0e6ff;
+        }
+        td.rate {
+            text-align:right;
+            font-variant-numeric: tabular-nums;
+            color:#e0d8ff;
+        }
+        tbody tr:hover {
+            background-color: rgba(123, 93, 231, 0.08);
+        }
+        /* Login and Welcome Boxes */
+        #panel-login {
+            padding: 20px;
+            background: rgba(240, 240, 240, 0.95);
+            border-radius: 16px;
+            color: #333;
+            max-width: 400px;
+            margin: 0 auto;
+            box-shadow: 0 0 25px rgba(138,103,226,0.4);
+        }
+        #loginBox {
+            display: flex;
+            flex-direction: column;
+        }
+        #loginBox input {
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            border: 1px solid #aaa;
+            font-size: 1rem;
+            outline: none;
+        }
+        #loginBox input:focus {
+            border-color: #8067d9;
+            box-shadow: 0 0 8px #8a67e2;
+        }
+        #loginBox button {
+            padding: 12px;
+            background: #8067d9;
+            border: none;
+            color: white;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 0 16px #b8a7ffcc;
+            transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            font-size: 1.1rem;
+        }
+        #loginBox button:hover {
+            background: #997ef8;
+            box-shadow: 0 0 20px #c8baffdd;
+        }
+        #loginStatus {
+            margin-top: 12px;
+            font-size: 1rem;
+            text-align: center;
+        }
+        #logout-btn {
+            margin-top: 15px;
+            padding: 12px;
+            background: #c47676;
+            border: none;
+            color: white;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 0 17px #ff9d9dcc;
+            width: 100%;
+            font-size: 1.1rem;
+            display: none;
+            transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        #logout-btn:hover {
+            background: #e38686;
+            box-shadow: 0 0 21px #ffadadcc;
+        }
+        /* Responsive */
+        @media (max-width: 600px) {
+            main {
+                flex-direction: column;
+                padding: 10px 15px;
+            }
+            .left-bar, .right-bar {
+                width: 100%;
+                max-height: 150px;
+                margin: 10px 0;
+            }
+            .main-content {
+                padding: 0;
+            }
+            #panel-login {
+                max-width: 100%;
+                padding: 15px;
+                border-radius: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="app" role="main" aria-label="Advanced Currency Converter and Features Application">
+    <header><h1 tabindex="0">Advanced Currency Converter</h1></header>
+
+    <nav class="top-menu" role="tablist" aria-label="Top Navigation Menu">
+        <button role="tab" aria-selected="true" tabindex="0" id="tab-converter" aria-controls="panel-converter" class="active">Converter</button>
+        <button role="tab" aria-selected="false" tabindex="-1" id="tab-info" aria-controls="panel-info">More Info</button>
+        <button role="tab" aria-selected="false" tabindex="-1" id="tab-rates" aria-controls="panel-rates">Rates</button>
+        <button role="tab" aria-selected="false" tabindex="-1" id="tab-login" aria-controls="panel-login">Login</button>
+    </nav>
+
+    <main>
+        <div class="left-bar">
+            <h2 tabindex="0">Transaction History</h2>
+            <div class="history-list" id="history-list" aria-live="polite" aria-atomic="false" tabindex="0" aria-label="List of previous conversion transactions">No transactions yet.</div>
+            <button id="clear-history-btn" style="margin-top:20px; background:#bb5555; border:none; border-radius:12px; padding:12px 22px; width:100%; font-weight:700; color:#ffc4c4; cursor:pointer; box-shadow:0 0 14px #cc7e7e;">Clear History</button>
+        </div>
+        <div class="main-content">
+            <section id="panel-converter" role="tabpanel" aria-labelledby="tab-converter">
+                <div class="converter-box">
+                    <form id="converter-form" autocomplete="off" aria-live="polite" aria-atomic="true">
+                        <label for="from-currency">From Currency</label>
+                        <select id="from-currency" name="fromCurrency" aria-required="true" aria-describedby="from-currency-desc"></select>
+                        <div id="from-currency-desc" class="sr-only">Select currency to convert from</div>
+
+                        <label for="amount">Amount</label>
+                        <input type="number" id="amount" name="amount" min="0" step="any" placeholder="Enter amount" required aria-required="true" aria-describedby="amount-desc" />
+                        <div id="amount-desc" class="sr-only">Enter amount to convert</div>
+
+                        <label for="to-currency">To Currency</label>
+                        <select id="to-currency" name="toCurrency" aria-required="true" aria-describedby="to-currency-desc"></select>
+                        <div id="to-currency-desc" class="sr-only">Select currency to convert to</div>
+
+                        <div class="actions">
+                            <button type="button" class="swap-btn" id="swap-btn" title="Swap From and To currencies" aria-label="Swap currencies">&#8646;</button>
+                            <button type="submit" class="convert-btn" id="convert-btn" aria-live="polite" aria-atomic="true">Convert</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="result-box" id="result" tabindex="0" aria-live="polite" aria-atomic="true"></div>
+                <div class="rate-info" id="rate-info" aria-live="polite" aria-atomic="true"></div>
+            </section>
+
+            <section id="panel-info" role="tabpanel" aria-labelledby="tab-info" hidden>
+                <h2 tabindex="0" style="text-align:center; font-weight: 700; margin-bottom: 20px;">More Info</h2>
+                <p><b>Purpose of the Website:</b></p>
+                <p>This website helps users understand the importance of currency conversion in a simple and accessible way.</p>
+                <p><b>Why It Is Needed:</b></p>
+                <ul>
+                  <li>People frequently need to convert money while traveling abroad or shopping online.</li>
+                  <li>Understanding exchange rates is essential for international students, businesses, and travelers.</li>
+                  <li>This platform educates users about why currency converters matter.</li>
+                </ul>
+                <p><b>Key Advantages:</b></p>
+                <ul>
+                  <li>Easy-to-navigate interface with a clean layout.</li>
+                  <li>Integrated login system to personalize user experience.</li>
+                  <li>Dedicated sections for reviews, contact, and information.</li>
+                </ul>
+                <p><b>Website Details:</b></p>
+                <ul>
+                  <li>Developed by: Shisir Dhakal</li>
+                  <li>Location: Butwal, Nepal</li>
+                  <li>Built using HTML, CSS, and JavaScript.</li>
+                  <li>Lightweight, fast, and responsive design for all devices.</li>
+                </ul>
+            </section>
+
+            <section id="panel-rates" role="tabpanel" aria-labelledby="tab-rates" hidden>
+                <h2 tabindex="0" style="text-align:center; font-weight: 700; margin-bottom: 20px;">Current Rates (Base USD)</h2>
+                <table aria-describedby="rates-desc">
+                    <thead>
+                    <tr>
+                        <th>Currency</th>
+                        <th>Rate</th>
+                    </tr>
+                    </thead>
+                    <tbody id="rates-table-body">
+                    <tr><td colspan="2" style="text-align:center; color:#bbb;">Loading rates...</td></tr>
+                    </tbody>
+                </table>
+                <div id="rates-desc" class="sr-only">Shows current exchange rates for popular currencies relative to USD</div>
+                <div class="rate-info" id="rates-update-info" aria-live="polite" aria-atomic="true" style="margin-top:15px; font-size: 0.9rem; color: #ceaaffcc; text-align:center;"></div>
+            </section>
+
+            <section id="panel-login" role="tabpanel" aria-labelledby="tab-login" hidden>
+                <div id="panel-login" aria-live="polite" aria-atomic="true">
+                    <div id="loginBox" class="login-box" aria-label="Login Form">
+                        <h2 style="color:#333;">Login</h2>
+                        <input type="email" id="login-email" placeholder="Email" aria-required="true" aria-label="Email" autocomplete="email" />
+                        <input type="password" id="login-pass" placeholder="Password" aria-required="true" aria-label="Password" autocomplete="current-password" />
+                        <button id="login-btn" aria-label="Login Button">Login</button>
+                        <div id="loginStatus" role="alert" aria-live="assertive" style="margin-top: 10px; min-height: 1.2em;"></div>
+                    </div>
+                    <div id="welcomeBox" class="welcome-box" aria-label="User Logged In Info" tabindex="0" style="margin-top: 15px; color:#333; font-weight: 600;">
+                        <p id="welcomeText"></p>
+                        <button id="logout-btn" aria-label="Logout Button">Logout</button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="right-bar">
+            <h2 tabindex="0">Transaction History</h2>
+            <div class="history-list" id="history-list" aria-live="polite" aria-atomic="false" tabindex="0" aria-label="List of previous conversion transactions">No transactions yet.</div>
+            <button id="clear-history-btn" style="margin-top:20px; background:#bb5555; border:none; border-radius:12px; padding:12px 22px; width:100%; font-weight:700; color:#ffc4c4; cursor:pointer; box-shadow:0 0 14px #cc7e7e;">Clear History</button>
+        </div>
+    </main>
+
+    <nav class="taskbar" role="tablist" aria-label="Bottom Navigation Taskbar">
+        <button role="tab" aria-selected="true" tabindex="0" id="tab-converter" aria-controls="panel-converter" class="active">Converter</button>
+        <button role="tab" aria-selected="false" tabindex="-1" id="tab-info" aria-controls="panel-info">More Info</button>
+        <button role="tab" aria-selected="false" tabindex="-1" id="tab-rates" aria-controls="panel-rates">Rates</button>
+        <button role="tab" aria-selected="false" tabindex="-1" id="tab-login" aria-controls="panel-login">Login</button>
+    </nav>
+
+    <footer>
+        &copy; 2024 Advanced Currency Converter. All rights reserved.
+    </footer>
+</div>
+
+<script>
+    const currencies = {
+        USD:"United States Dollar", EUR:"Euro", GBP:"British Pound Sterling", JPY:"Japanese Yen", AUD:"Australian Dollar", CAD:"Canadian Dollar",
+        CHF:"Swiss Franc", CNY:"Chinese Yuan", INR:"Indian Rupee", BRL:"Brazilian Real", MXN:"Mexican Peso", ZAR:"South African Rand",
+        NZD:"New Zealand Dollar", KRW:"South Korean Won", SGD:"Singapore Dollar", RUB:"Russian Ruble", TRY:"Turkish Lira",
+        SEK:"Swedish Krona", NOK:"Norwegian Krone", DKK:"Danish Krone", PLN:"Polish Zloty", HKD:"Hong Kong Dollar",
+        MYR:"Malaysian Ringgit", IDR:"Indonesian Rupiah", THB:"Thai Baht", TWD:"New Taiwan Dollar", PHP:"Philippine Peso",
+        CZK:"Czech Koruna", HUF:"Hungarian Forint", ILS:"Israeli New Shekel", SAR:"Saudi Riyal", AED:"UAE Dirham"
+    };
+    const fromSelect = document.getElementById('from-currency');
+    const toSelect = document.getElementById('to-currency');
+    const amountInput = document.getElementById('amount');
+    const convertBtn = document.getElementById('convert-btn');
+    const swapBtn = document.getElementById('swap-btn');
+    const resultBox = document.getElementById('result');
+    const rateInfo = document.getElementById('rate-info');
+    const historyList = document.getElementById('history-list');
+    const clearHistoryBtn = document.getElementById('clear-history-btn');
+    const navButtons = document.querySelectorAll('nav.top-menu button[role="tab"], nav.taskbar button[role="tab"]');
+
+    // Login elements
+    const loginEmailInput = document.getElementById('login-email');
+    const loginPassInput = document.getElementById('login-pass');
+    const loginBtn = document.getElementById('login-btn');
+    const loginStatus = document.getElementById('loginStatus');
+    const logoutBtn = document.getElementById('logout-btn');
+    const welcomeBox = document.getElementById('welcomeBox');
+    const welcomeText = document.getElementById('welcomeText');
+    const loginBox = document.getElementById('loginBox');
+
+    const LS_HISTORY = "currencyConversionHistory";
+    const LS_LOGIN = "currencyAppLoginUser";
+
+    function populateCurrencyDropdowns(){
+      Object.entries(currencies).forEach(([code,name])=>{
+        const opt1=document.createElement('option');
+        opt1.value=code; opt1.textContent = `${code} - ${name}`;
+        fromSelect.appendChild(opt1);
+        const opt2=document.createElement('option');
+        opt2.value=code; opt2.textContent = `${code} - ${name}`;
+        toSelect.appendChild(opt2);
+      });
+    }
+    function setDefaultCurrencies(){fromSelect.value="USD";toSelect.value="EUR";}
+    function swapCurrencies(){
+      [fromSelect.value,toSelect.value]=[toSelect.value,fromSelect.value];
+      resultBox.textContent=rateInfo.textContent="";
+    }
+    function isValidEmail(email){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+    async function convertCurrency(fromCurrency,toCurrency,amount){
+      if(fromCurrency===toCurrency) return {convertedAmount:amount,rate:1,updated:new Date()};
+      try{
+        const res=await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`);
+        if(!res.ok) throw new Error("API error");
+        const data=await res.json();
+        if(!data.rates || !data.rates[toCurrency]) throw new Error("No rate");
+        const rate=data.rates[toCurrency];
+        return {convertedAmount:amount*rate,rate,updated:new Date(data.time_last_updated*1000)};
+      }catch(e){throw e;}
+    }
+    function addToHistory(entry){
+      let h=JSON.parse(localStorage.getItem(LS_HISTORY))||[];
+      h.unshift(entry);
+      if(h.length>30) h.pop();
+      localStorage.setItem(LS_HISTORY,JSON.stringify(h));
+    }
+    function renderHistory(){
+      const h=JSON.parse(localStorage.getItem(LS_HISTORY))||[];
+      if(!h.length) {historyList.textContent="No transactions yet.";return;}
+      historyList.innerHTML="";
+      h.forEach(item=>{
+        const d=document.createElement('div');
+        d.className="history-item break-word";
+        d.innerHTML=`<div>${item.amount} ${item.from} → ${parseFloat(item.converted).toFixed(4)} ${item.to}</div>
+        <div class="history-timestamp">${new Date(item.time).toLocaleString()}</div>`;
+        historyList.appendChild(d);
+      });
+    }
+    clearHistoryBtn.onclick=()=>{
+      if(confirm("Are you sure you want to clear all transaction history?")){
+        localStorage.removeItem(LS_HISTORY);
+        renderHistory();
+      }
+    };
+    function recordHistory(amount, fromCur, converted, toCur){
+      addToHistory({
+        amount: amount.toLocaleString(undefined, {maximumFractionDigits:8}),
+        from: fromCur,
+        converted: converted.toFixed(8),
+        to: toCur,
+        time: Date.now()
+      });
+      renderHistory();
+    }
+
+    // Tab switching
+    function switchTab(newId){
+      navButtons.forEach(btn=>{
+        const pid=btn.getAttribute('aria-controls');
+        const isActive = btn.id === newId;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive?'true':'false');
+        btn.setAttribute('tabindex', isActive?'0':'-1');
+        if(pid){
+            const panel = document.getElementById(pid);
+            if(panel) panel.hidden = !isActive;
+        }
+      });
+    }
+
+    // Keyboard tab navigation helper
+    function handleTabNavigation(e, buttons){
+      let idx=[...buttons].indexOf(document.activeElement);
+      if(e.key==='ArrowRight') idx=(idx+1)%buttons.length;
+      else if(e.key==='ArrowLeft') idx=(idx-1+buttons.length)%buttons.length;
+      else if(e.key==='Home') idx=0;
+      else if(e.key==='End') idx=buttons.length-1;
+      else return;
+      buttons[idx].focus();
+      e.preventDefault();
+    }
+
+    // Initialize currency dropdowns, history and tab handlers
+    function init(){
+      populateCurrencyDropdowns();
+      setDefaultCurrencies();
+      renderHistory();
+      bindEvents();
+      updateLoginUI();
+      switchTab('tab-converter');
+    }
+
+    function bindEvents(){
+      document.getElementById('converter-form').addEventListener('submit',async e=>{
+        e.preventDefault();
+        const fromCurrency=fromSelect.value;
+        const toCurrency=toSelect.value;
+        const amountStr=amountInput.value.trim();
+        const amount=parseFloat(amountStr);
+        resultBox.textContent=rateInfo.textContent="";
+        if(!amountStr || isNaN(amount) || amount<0){
+          resultBox.textContent="Please enter a valid amount greater than or equal to 0.";
+          return;
+        }
+        resultBox.textContent="Converting...";
+        try{
+          const conv=await convertCurrency(fromCurrency,toCurrency,amount);
+          const convRounded=parseFloat(conv.convertedAmount.toFixed(6));
+          resultBox.textContent=`${amount.toLocaleString()} ${fromCurrency} = ${convRounded.toLocaleString()} ${toCurrency}`;
+          rateInfo.textContent=`1 ${fromCurrency} = ${conv.rate.toFixed(6)} ${toCurrency} (Updated ${conv.updated.toLocaleString()})`;
+          recordHistory(amount,fromCurrency,convRounded,toCurrency);
+        } catch {
+          resultBox.textContent="Failed to convert currency. Please try again later.";
+        }
+      });
+      swapBtn.addEventListener('click',()=>{
+        swapCurrencies();
+        if(amountInput.value.trim()!==""){
+          convertBtn.click();
+        }
+      });
+      clearHistoryBtn.addEventListener('click', () => {
+        if(confirm("Are you sure you want to clear all transaction history?")){
+          localStorage.removeItem(LS_HISTORY);
+          renderHistory();
+        }
+      });
+      loginBtn.addEventListener('click', handleLogin);
+      logoutBtn.addEventListener('click', handleLogout);
+
+      navButtons.forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.id));
+        btn.addEventListener('keydown', e => handleTabNavigation(e, navButtons));
+      });
+    }
+    function handleLogin(){
+      const email = loginEmailInput.value.trim().toLowerCase();
+      const pass = loginPassInput.value.trim();
+      if (!email || !pass) {
+        loginStatus.textContent = "Please enter both email and password.";
+        loginStatus.style.color = "#ff6b6b";
+        return;
+      }
+      if (!isValidEmail(email)) {
+        loginStatus.textContent = "Please enter a valid email.";
+        loginStatus.style.color = "#ff6b6b";
+        return;
+      }
+      // For demo: accept any password. Real app would validate.
+      localStorage.setItem(LS_LOGIN, email);
+      updateLoginUI();
+      loginStatus.textContent = "";
+      loginEmailInput.value = "";
+      loginPassInput.value = "";
+    }
+    function handleLogout(){
+      localStorage.removeItem(LS_LOGIN);
+      updateLoginUI();
+    }
+    function getLoggedInUser(){
+      return localStorage.getItem(LS_LOGIN);
+    }
+    function updateLoginUI(){
+      const user = getLoggedInUser();
+      if(user){
+        welcomeText.textContent = `Logged in as: ${user}`;
+        welcomeBox.style.display = "block";
+        loginBox.style.display = "none";
+        logoutBtn.style.display = "block";
+      } else {
+        welcomeBox.style.display = "none";
+        loginBox.style.display = "flex";
+        logoutBtn.style.display = "none";
+      }
+    }
+
+    init();
+</script>
+</body>
+</html>
+
